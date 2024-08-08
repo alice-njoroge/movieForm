@@ -1,5 +1,5 @@
-<script setup>
-import {ref} from "vue";
+<script setup xmlns="http://www.w3.org/1999/html">
+import {computed, ref} from "vue";
 import {StarIcon} from "@heroicons/vue/24/solid";
 import {items} from "./movies.json";
 import ModalComponent from "./ModalComponent.vue";
@@ -19,6 +19,53 @@ function openModal() {
 function updateRating(movieIndex, rating) {
   movies.value[movieIndex].rating = rating;
 }
+
+const genres = ref([
+  {name: "Drama", value: "drama"},
+  {name: "Action", value: "action"},
+  {name: "Thriller", value: "thriller"}
+]);
+
+const form = ref({
+  title: "",
+  description: "",
+  image: "",
+  genres: [],
+  inTheatre: false
+});
+
+const formDirty = ref({
+  title: false,
+  description: false,
+  image: false,
+  genres: false,
+  inTheatre: false
+});
+const validTitle = computed(() => formDirty.value.title && form.value.title.length > 0);
+const validGenre = computed(() => formDirty.value.genres && form.value.genres.length > 0)
+
+const formValid = computed(() => {
+  return validTitle.value && validGenre.value
+});
+const resetForm = () => {
+  form.value = {
+    title: "",
+    description: "",
+    image: "",
+    genres: [],
+    inTheatre: false
+  };
+};
+const handleSubmit = () => {
+  if (formValid.value) {
+    items.push(form.value);
+    //clear the form before closing the modal
+    resetForm();
+    closeModal();
+  }
+}
+
+
 </script>
 
 <template>
@@ -36,7 +83,56 @@ function updateRating(movieIndex, rating) {
       v-if="isOpen"
       @closeModal="closeModal"
       @openModal="openModal"
-  />
+      class="w-full shadow-md"
+  >
+    <template #title> Add a Movie</template>
+    <template #body>
+      <form class="bg-white rounded px-8 pt-6 pb-8 mb-4" @submit.prevent="handleSubmit">
+        {{ form }}
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="title">Title</label>
+          <input v-model="form.title"
+                 @blur="formDirty.title = true"
+                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                 id="title" type="text" placeholder="title">
+          <p class="text-red-600 text-xs" v-if="!validTitle"> Title is required </p>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="description">Description</label>
+          <textarea @blur="formDirty.description = true" v-model="form.description"
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    id="description" type="text"></textarea>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="images">Images</label>
+          <input @blur="formDirty.image = true" v-model="form.image"
+                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                 id="images" type="text">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="genre">Genre</label>
+          <select @blur="formDirty.genres = true" v-model="form.genres" multiple
+                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            <option v-for="genre in genres" :key="genre.value"> {{ genre.name }}</option>
+          </select>
+          <p class="text-red-600 text-xs" v-if="!validGenre"> Genre is required </p>
+        </div>
+        <div class="mb-4">
+          <input @blur="formDirty.inTheatre = true" v-model="form.inTheatre" type="checkbox"/> In Theatres
+        </div>
+        <div class="flex justify-between">
+          <button type="submit" class="bg-blue-300 border-1 px-4 py-1 m-0.5 rounded-full" @click="handleSubmit">
+            Submit
+          </button>
+          <button type="submit" class="border-1 px-4 py-1 m-0.5 rounded-full" @click="resetForm">
+            Cancel
+          </button>
+        </div>
+      </form>
+
+    </template>
+  </ModalComponent>
 
   <div class="app">
     <div class="movie-list">
@@ -106,3 +202,7 @@ function updateRating(movieIndex, rating) {
     </div>
   </div>
 </template>
+
+<style>
+
+</style>

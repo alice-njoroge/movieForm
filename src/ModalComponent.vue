@@ -20,6 +20,7 @@ defineProps({
 
   <TransitionRoot appear :show="isOpen" as="template">
     <Dialog as="div" @close="$emit('closeModal')" class="relative z-10">
+      <div class="fixed inset-0 bg-black/30" aria-hidden="true" />
       <TransitionChild
           as="template"
           enter="duration-300 ease-out"
@@ -46,19 +47,16 @@ defineProps({
               leave-to="opacity-0 scale-95"
           >
             <DialogPanel
-                class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                class="w-full max-w-md flex-grow transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
             >
               <DialogTitle
                   as="h3"
                   class="text-lg font-medium leading-6 text-gray-900"
               >
-                Payment successful
+               <slot name="title"> Modal Title </slot>
               </DialogTitle>
               <div class="mt-2">
-                <p class="text-sm text-gray-500">
-                  Your payment has been successfully submitted. We’ve sent you
-                  an email with all of the details of your order.
-                </p>
+                <slot name="body"> Modal Body </slot>
               </div>
 
               <div class="mt-4">
